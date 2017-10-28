@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-set -x
+KODI="10.0.0.10:80"
+
 
 function debug () {
   echo "Debug: $@"
@@ -15,22 +16,19 @@ function execute_cmd () {
   action=$1
   params=$2
   debug "Executing $action with $params"
-  /usr/bin/curl -s --header "Content-Type: application/json" --data-binary '{"jsonrpc": "2.0", "method": "'"$action"'", "params": '"$params"',  "id": 1}' http://10.0.0.10/jsonrpc | /usr/bin/jq
+  curl -s --header "Content-Type: application/json" --data-binary '{"jsonrpc": "2.0", "method": "'"$action"'", "params": '"$params"',  "id": 1}' http://${KODI}/jsonrpc | jq
 }
 
 
 function main () {
   case $1 in 
     toggle)
-      echo "Play/Pause"
       execute_cmd "Player.PlayPause" '{"playerid": 0}'
       ;;
     next)
-      echo "Next"
       execute_cmd "Player.GoTo" '{"playerid": 0, "to": "next"}'
       ;;
     prev)
-      echo "Prev"
       execute_cmd "Player.GoTo" '{"playerid": 0, "to": "previous"}'
       ;;
     vol)
@@ -51,6 +49,5 @@ function main () {
       ;;
   esac
 }
-
 
 main $@
