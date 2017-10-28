@@ -1,0 +1,31 @@
+#!/bin/bash
+
+N=1
+PATTERN=""
+
+while [ $#  -gt 0 ] ; do
+	case $1 in 
+		-n|--num)
+			N=$2
+			shift
+			;;
+		-p|--pattern)
+			PATTERN="$2"
+			shift
+			;;
+		*)
+			echo "Invalid arg: $1"
+			exit 1
+			;;
+	esac
+	shift
+done
+
+
+SHUF_ARGS="--head-count=${N}"
+
+if [ -n "$PATTERN" ] ; then
+	find . -type f -iname "$PATTERN" | shuf $SHUF_ARGS 
+else
+	find . -type f | shuf $SHUF_ARGS 
+fi

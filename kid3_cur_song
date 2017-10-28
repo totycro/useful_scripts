@@ -1,0 +1,6 @@
+#!/bin/sh
+FILE=`MPD_HOST=$(get_mpd_host.sh) mpc --format "%file%" | head -n1`
+
+cd /home/totycro/musik
+
+kid3 "$FILE"

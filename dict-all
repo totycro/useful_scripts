@@ -1,0 +1,32 @@
+#!/bin/zsh
+
+
+ETYMOLOGY_ONLY=0
+EXAMPLE_ONLY=0
+
+if [ "$1" = "-e" ] ; then
+	ETYMOLOGY_ONLY=1
+	shift
+elif [ "$1" = "-x" ] ; then
+	EXAMPLE_ONLY=1
+	shift
+fi
+
+TERM="$@"
+
+URL1="https://es.pons.com/traducción?q=${TERM}&l=dees&in=&lf="
+URL2="https://dict.leo.org/esde/index_de.html#/search=${TERM}&searchLoc=0&resultOrder=basic&multiwordShowSingle=on&pos=0"
+URL3="https://es.wiktionary.org/wiki/${TERM}"
+URL4="https://en.wiktionary.org/wiki/${TERM}"
+URL5="https://translate.google.com/#es/en/${TERM}"
+URL6="tatoeba.org/eng/sentences/search?query=${TERM}&from=spa&to=und&orphans=no&unapproved=no&user=&tags=&has_audio=&trans_filter=limit&trans_to=und&trans_link=&trans_user=&trans_orphan=&trans_unapproved=&trans_has_audio=&sort=words"
+URL7="http://etimologias.dechile.net/?${TERM}"
+
+if [ $ETYMOLOGY_ONLY -eq 1 ] ; then
+	firefox "$URL3" "$URL4" "$URL7"
+elif [ $EXAMPLE_ONLY -eq 1 ] ; then
+	firefox "$URL6"
+else
+	firefox "$URL1" "$URL2" "$URL5" "$URL6" "$URL3" "$URL4" "$URL7"
+fi
+
