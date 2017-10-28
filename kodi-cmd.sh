@@ -20,16 +20,21 @@ function execute_cmd () {
 }
 
 
+function get_player_id () {
+  # returns first player id, which seems to be the only one in my usage
+  curl -v --header "Content-Type: application/json" --data-binary '{"jsonrpc": "2.0", "method": "Player.GetActivePlayers", "id": 1}' http://10.0.0.10/jsonrpc | jq '.result[0].playerid'
+}
+
 function main () {
   case $1 in 
     toggle)
-      execute_cmd "Player.PlayPause" '{"playerid": 0}'
+      execute_cmd "Player.PlayPause" '{"playerid": '$(get_player_id)'}'
       ;;
     next)
-      execute_cmd "Player.GoTo" '{"playerid": 0, "to": "next"}'
+      execute_cmd "Player.GoTo" '{"playerid": '$(get_player_id)', "to": "next"}'
       ;;
     prev)
-      execute_cmd "Player.GoTo" '{"playerid": 0, "to": "previous"}'
+      execute_cmd "Player.GoTo" '{"playerid": '$(get_player_id)', "to": "previous"}'
       ;;
     vol)
       case $2 in
