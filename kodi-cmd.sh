@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
 # settings
-KODI="10.0.0.10:80"
-NFS_SERVER="10.0.0.35"
+KODI="192.168.0.164:80"
+NFS_SERVER=$(ip a s wlp2s0 | grep "inet " | awk '{ print $2 }' | cut -d'/' -f 1)
 
 
 # this produces sane behavior for "main $@"
@@ -64,7 +64,16 @@ function arg_or_clipboard_content () {
 
 
 function main () {
-  case $1 in 
+  cmd=$1
+  arg1=$2
+  # TODO: use these instead of ${num} below
+
+  if [ -f "$cmd" ] ; then
+    arg1=$cmd
+    cmd="play_file"
+  fi
+
+  case $cmd in
     toggle)
       execute_cmd "Player.PlayPause" '{"playerid": '$(get_player_id)'}'
       ;;
@@ -90,7 +99,7 @@ function main () {
       execute_cmd "Player.Seek" "{\"value\": $seek_time, \"playerid\": $(get_player_id)}"
       ;;
     play_file)
-      file=$(arg_or_clipboard_content $2)
+      file=$(arg_or_clipboard_content "$arg1")
       path="$(pwd)/${file}"
       nfs_path="nfs://${NFS_SERVER}${path}"
       execute_cmd "Player.Open" "{\"item\": {\"file\": \"${nfs_path}\"}}"
@@ -105,15 +114,16 @@ function main () {
         exit 1
       fi
       debug "Playing video with id ${id}"
-      youtube_plugin_path="plugin://plugin.video.youtube/?action=play_video&videoid=$id"
+      youtube_plugin_path="plugin://plugin.video.youtube/play/?video_id=$id"
       execute_cmd "Player.Open" "{\"item\": {\"file\": \"${youtube_plugin_path}\"}}"
       ;;
     vol)
+      # if parameter is "+4", ignore 4 for now since we have a custom increment/decrement here and want to be compatible to mcc
       case $2 in
-        +)
+        +*)
           execute_cmd "Application.SetVolume" '{"volume": "increment"}'
           ;;
-        -)
+        -*)
           execute_cmd "Application.SetVolume" '{"volume": "decrement"}'
           ;;
         *)
