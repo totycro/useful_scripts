@@ -100,7 +100,7 @@ function main () {
       ;;
     play_file)
       file=$(arg_or_clipboard_content "$arg1")
-      path="$(pwd)/${file}"
+      path=$(realpath "$(pwd)/${file}")
       nfs_path="nfs://${NFS_SERVER}${path}"
       execute_cmd "Player.Open" "{\"item\": {\"file\": \"${nfs_path}\"}}"
       ;;
