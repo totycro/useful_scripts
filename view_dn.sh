@@ -1,6 +1,9 @@
 #!/bin/bash -x
 
 last_dn_day_delta=1
+if [[ $(date +%u) -eq 7 ]] ; then  # Sunday
+    last_dn_day_delta=2
+fi
 if [[ $(date +%u) -eq 1 ]] ; then  # Monday
     last_dn_day_delta=3
 fi
