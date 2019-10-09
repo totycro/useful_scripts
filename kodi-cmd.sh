@@ -22,7 +22,7 @@ function execute_cmd () {
   action=$1
   params=$2
   debug "Executing $action with $params"
-  curl -s --header "Content-Type: application/json" --data-binary '{"jsonrpc": "2.0", "method": "'"$action"'", "params": '"$params"',  "id": 1}' http://${KODI}/jsonrpc | jq
+  curl --silent --show-error --header "Content-Type: application/json" --data-binary '{"jsonrpc": "2.0", "method": "'"$action"'", "params": '"$params"',  "id": 1}' http://${KODI}/jsonrpc
 }
 
 
