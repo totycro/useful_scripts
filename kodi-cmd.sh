@@ -2,7 +2,7 @@
 
 # settings
 KODI="192.168.0.164:80"
-NFS_SERVER=$(ip a s wlp2s0 | grep "inet " | awk '{ print $2 }' | cut -d'/' -f 1 | head -n 1 )
+NFS_SERVER=$(ip a s wlp5s0 | grep "inet " | awk '{ print $2 }' | cut -d'/' -f 1 | head -n 1 )
 
 
 # this produces sane behavior for "main $@"
