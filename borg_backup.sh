@@ -54,12 +54,13 @@ borg create                                                           \
     --exclude '/home/totycro/.local'                                  \
     --exclude '/home/totycro/.config/chromium'                        \
     --exclude '/home/totycro/.config/Signal'                          \
-    --exclude '/home/totycro/git-2014'                                \
+    --exclude '/home/totycro/.config/Signal Beta'                     \
     --exclude '/home/totycro/local'                                   \
     --exclude '/home/totycro/Downloads'                               \
     --exclude '/home/totycro/old'                                     \
     --exclude '/home/totycro/.cabal'                                  \
     --exclude '/home/totycro/.hoogle'                                 \
+    --exclude '/home/totycro/.wine'                                   \
                                                                       \
     ::'{hostname}-{now:%Y-%m-%dT%H:%M:%S}'                            \
     /root                                                             \
