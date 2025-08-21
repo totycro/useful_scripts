@@ -6,7 +6,7 @@ set -x
 KODI_IP=`jq --raw-output ".ip" < /home/osmc/cli_remote.conf`
 KODI_PORT=`jq --raw-output ".port" < /home/osmc/cli_remote.conf`
 KODI="${KODI_IP}:${KODI_PORT}"
-NFS_SERVER=$(ip a s wlp5s0 | grep "inet " | awk '{ print $2 }' | cut -d'/' -f 1 | head -n 1 )
+# NFS_SERVER=$(ip a s wlp5s0 | grep "inet " | awk '{ print $2 }' | cut -d'/' -f 1 | head -n 1 )
 
 
 # this produces sane behavior for "main $@"
