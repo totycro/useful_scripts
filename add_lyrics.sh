@@ -1,6 +1,6 @@
 #!/bin/sh
 
-TIT=`MPD_HOST=$(get_mpd_host.sh) mpc | head -n1`
+TIT=`mpc | head -n1`
 
 F="$HOME/.lyrics/${TIT}.txt"
 touch "$F"
