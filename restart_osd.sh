@@ -1,6 +1,6 @@
 #!/bin/bash
 
-killall  conky
+killall conky
 
 # wenn conky -o dann durch transparentes fenster sichtbar
 #/usr/bin/conky -o &

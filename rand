@@ -33,7 +33,7 @@ fi
 SHUF_ARGS="--head-count=${N}"
 
 if [ -n "$PATTERN" ] ; then
-  find $DIR \( -type l -o -type f \) -regex "$PATTERN" | shuf $SHUF_ARGS
+  find $DIR \( -type l -o -type f \) -iregex "$PATTERN" | shuf $SHUF_ARGS
 else
   find $DIR \( -type l -o -type f \) | shuf $SHUF_ARGS
 fi
