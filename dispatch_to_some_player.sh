@@ -4,14 +4,6 @@ PLAYER_CONFIG_FILE=~/.config/dispatch_to_some_player/player
 
 player=$(cat "${PLAYER_CONFIG_FILE}")
 
-notify-send \
-  --expire-time=1 \
-  --icon=dialog-information \
-  --urgency=low \
-  "${player}" \
-  "${*}"
-
-
 if [ "$1" = "switch_player" ] ; then
     if [ "${player}" = "mcc" ] ; then
         player="kodi"
@@ -23,6 +15,14 @@ if [ "$1" = "switch_player" ] ; then
 fi
 
 
+kodi_is_playing=$(/home/totycro/bin/kodi-cmd.sh is_playing)
+
+# if kodi is playing, assume commands should go to kodi
+# to unpause, we do need the config file in any case though
+if [ "${kodi_is_playing}" = "true" ] ; then
+  player="kodi"
+fi
+
 case $player in
   kodi)
     /home/totycro/bin/kodi-cmd.sh $@
@@ -33,3 +33,13 @@ case $player in
     #/usr/local/bin/mcc.sh $@
     ;;
 esac
+
+
+notify-send \
+  --expire-time=1 \
+  --icon=dialog-information \
+  --urgency=low \
+  "${player}" \
+  "${*}" &
+
+
