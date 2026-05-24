@@ -46,7 +46,7 @@ function get_player_id () {
 
 
 function arg_or_clipboard_content () {
-  if [ -z "$1" ] ; then
+  if [ -z "${1:-}" ] ; then
     xclip -o
   else
     echo $1
@@ -89,7 +89,7 @@ function main () {
       execute_cmd "Player.Open" "{\"item\": {\"file\": \"${nfs_path}\"}}"
       ;;
     play_youtube)
-      youtube_url=$(arg_or_clipboard_content $2)
+      youtube_url=$(arg_or_clipboard_content ${2:-})
       regex="^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#\&\?]*).*"
       if [[ "$youtube_url" =~ $regex ]]; then
         id=${BASH_REMATCH[7]}
