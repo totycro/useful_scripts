@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # settings
-DEBUG=true
+DEBUG=false
 
 set -eu -o pipefail
 $DEBUG && set -x
@@ -116,17 +116,23 @@ function main () {
       esac
       ;;
     is_playing)
-      player_id=$(get_player_id)
-      if [ "${player_id}" = "null" ] ; then
-        echo "false"
-	exit 0
-      fi
-      result=$(_do_call_api "Player.GetProperties" '{"playerid": '$(get_player_id)', "properties": ["speed"]}')
-      speed=$(echo $result | jq '.result.speed')
-      if [ "${speed}" = "0" ] || [ "${speed}" = "null" ] ; then
-        echo "false"
+      # this might also run for autodetect, when we are in a different wifi
+      # and want a quick response
+      if ! ping -c 1 "${KODI_IP}" -W 0.02 -t 1 > /dev/null || ! nc -z "${KODI_IP}" "${KODI_PORT}" 2> /dev/null; then
+        echo false
       else
-	echo "true"
+        player_id=$(get_player_id)
+        if [ "${player_id}" = "null" ] ; then
+          echo "false"
+          exit 0
+        fi
+        result=$(_do_call_api "Player.GetProperties" '{"playerid": '$(get_player_id)', "properties": ["speed"]}')
+        speed=$(echo $result | jq '.result.speed')
+        if [ "${speed}" = "0" ] || [ "${speed}" = "null" ] ; then
+          echo "false"
+        else
+          echo "true"
+        fi
       fi
       ;;
     *)

@@ -15,6 +15,8 @@ if [ "$1" = "switch_player" ] ; then
 fi
 
 
+# NOTE: while we now solved the issue when we are in a differnet network,
+#       it's still awkward to unpause kodi
 kodi_is_playing=$(/home/totycro/bin/kodi-cmd.sh is_playing)
 
 # if kodi is playing, assume commands should go to kodi
