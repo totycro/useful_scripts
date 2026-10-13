@@ -20,7 +20,9 @@ IFS=$(echo $IFS | tr -d ' ')
 
 
 function debug () {
-  $DEBUG && echo "Debug: $@"
+  if $DEBUG; then
+    echo "Debug: $@"
+  fi
 }
 
 function error () {
