@@ -1,0 +1,111 @@
+#!/usr/bin/env python3
+"""Fetch plain lyrics for the current MPD song into ncmpcpp's default cache."""
+import argparse
+import json
+import os
+from pathlib import Path
+import re
+import subprocess
+import sys
+import tempfile
+from urllib.error import HTTPError
+from urllib.parse import urlencode
+from urllib.request import Request, urlopen
+
+
+def request(endpoint, params):
+    req = Request('https://lrclib.net/api/' + endpoint + '?' + urlencode(params),
+                  headers={'User-Agent': 'ncmpcpp-lrclib-helper/1.0'})
+    try:
+        with urlopen(req, timeout=8) as response:
+            return json.load(response)
+    except HTTPError as error:
+        if error.code == 404:
+            return None
+        raise
+
+
+def lyrics(record):
+    if not record:
+        return None
+    if record.get('plainLyrics'):
+        return record['plainLyrics']
+    if record.get('syncedLyrics'):
+        return re.sub(r'\[\d+:\d+(?:\.\d+)?\]', '', record['syncedLyrics'])
+    if record.get('instrumental'):
+        return '[Instrumental]'
+    return None
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--artist', help='manual lookup; requires --title')
+    parser.add_argument('--title', help='manual lookup; requires --artist')
+    parser.add_argument('--album', default='')
+    parser.add_argument('--duration', type=float, help='duration in seconds')
+    parser.add_argument('--directory', type=Path, default=Path.home() / '.lyrics')
+    args = parser.parse_args()
+    if bool(args.artist) != bool(args.title):
+        parser.error('--artist and --title must be supplied together')
+    if not args.artist:
+        result = subprocess.run(['mpc', '--format', '%artist%\n%title%\n%album%\n%time%',
+                                 'current'], capture_output=True, text=True, timeout=5)
+        if result.returncode:
+            raise RuntimeError(result.stderr.strip() or 'Cannot read MPD metadata')
+        fields = result.stdout.rstrip('\n').split('\n')
+        if len(fields) != 4 or not fields[0] or not fields[1]:
+            raise RuntimeError('No current song with artist and title tags')
+        args.artist, args.title, args.album, duration = fields
+        if duration:
+            args.duration = 0
+            for part in duration.split(':'):
+                args.duration = args.duration * 60 + float(part)
+    # Matches ncmpcpp's default generate_win32_compatible_filenames = yes.
+    filename = re.sub(r'["*/:<>?\\|]', '', args.artist + ' - ' + args.title) + '.txt'
+    target = args.directory / filename
+    if target.exists():
+        print('Already cached:', target)
+        return
+    params = {'artist_name': args.artist, 'track_name': args.title}
+    if args.album:
+        params['album_name'] = args.album
+    if args.duration is not None:
+        params['duration'] = args.duration
+    text = lyrics(request('get', params))
+    if not text:
+        records = request('search', {'artist_name': args.artist, 'track_name': args.title}) or []
+        records = [r for r in records
+                   if r.get('artistName', '').casefold() == args.artist.casefold()
+                   and r.get('trackName', '').casefold() == args.title.casefold()
+                   and lyrics(r)
+                   and (args.duration is None
+                        or abs(float(r.get('duration', 0)) - args.duration) <= 5)]
+        records.sort(key=lambda r: (r.get('albumName', '').casefold() != args.album.casefold(),
+                                   abs(float(r.get('duration', 0)) - (args.duration or 0))))
+        text = lyrics(records[0]) if records else None
+    if not text:
+        raise RuntimeError('No matching lyrics on LRCLIB')
+    target.parent.mkdir(parents=True, exist_ok=True)
+    temporary = None
+    try:
+        with tempfile.NamedTemporaryFile(mode='w', encoding='utf-8',
+                                         dir=target.parent, delete=False) as output:
+            temporary = output.name
+            output.write(text.rstrip() + '\n')
+        # Publish a complete file without replacing an existing cached lyric.
+        try:
+            os.link(temporary, target)
+        except FileExistsError:
+            pass
+    finally:
+        if temporary:
+            os.unlink(temporary)
+    print('Saved:', target)
+
+
+if __name__ == '__main__':
+    try:
+        main()
+    except (OSError, ValueError, RuntimeError, subprocess.SubprocessError) as error:
+        print('LRCLIB:', error, file=sys.stderr)
+        sys.exit(1)
