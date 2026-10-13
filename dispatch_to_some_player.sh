@@ -38,7 +38,7 @@ esac
 
 
 notify-send \
-  --expire-time=1 \
+  --expire-time=2000 \
   --icon=dialog-information \
   --urgency=low \
   "${player}" \
